@@ -1,6 +1,10 @@
 package lexer
 
 import (
+	"bytes"
+	"bufio"
+	"os"
+	"strings"
 	"testing"
 
 	. "github.com/jmank88/gql/language/errors"
@@ -437,4 +441,110 @@ func TestReadToken(t *testing.T) {
 			t.Errorf("case: %v; expected %v but got %v", testCase, testCase.expected, val)
 		}
 	}
+}
+
+var (
+	lexBenchString100 = lexBenchString(100)
+	lexBenchString1000 = lexBenchString(1000)
+	lexBenchString10000 = lexBenchString(10000)
+)
+
+//TODO randomize this?
+func lexBenchString(n int) string {
+	b := &bytes.Buffer{}
+	for i := 0; i < n; i++ {
+		if i + 10 < n {
+			// 10 runes at once
+			b.WriteString("  ASDFGHJK")
+			i += 9
+		} else {
+			b.WriteRune('A')
+		}
+	}
+	return b.String()
+}
+
+func benchmarkLex(b *testing.B, initLexer func() (*Lexer, error)) {
+	for n := 0; n < b.N; n++ {
+		l, err := initLexer()
+		if err != nil {
+			b.Fatal(err)
+		}
+
+		var t Token
+		for {
+			err = l.Lex(&t)
+			if err != nil {
+				b.Fatal(err)
+			} else if t.Kind == EOF {
+				break
+			}
+		}
+	}
+}
+
+func BenchmarkStringLex100(b *testing.B) {
+	benchmarkLex(b, func() (*Lexer, error) {
+		return NewStringLexer(lexBenchString100)
+	})
+}
+
+func BenchmarkReaderLex100(b *testing.B) {
+	benchmarkLex(b, func() (*Lexer, error) {
+		return NewReaderLexer(strings.NewReader(lexBenchString100))
+	})
+}
+
+func BenchmarkFileReaderLex100(b *testing.B) {
+	f, err := os.Open("test_data/testScan100")
+	if err != nil {
+		b.Fatal(err)
+	}
+	benchmarkLex(b, func() (*Lexer, error) {
+		return NewReaderLexer(bufio.NewReader(f))
+	})
+}
+
+func BenchmarkStringLex1000(b *testing.B) {
+	benchmarkLex(b, func() (*Lexer, error) {
+		return NewStringLexer(lexBenchString1000)
+	})
+}
+
+func BenchmarkReaderLex1000(b *testing.B) {
+	benchmarkLex(b, func() (*Lexer, error) {
+		return NewReaderLexer(strings.NewReader(lexBenchString1000))
+	})
+}
+
+func BenchmarkFileReaderLex1000(b *testing.B) {
+	f, err := os.Open("test_data/testScan1000")
+	if err != nil {
+		b.Fatal(err)
+	}
+	benchmarkLex(b, func() (*Lexer, error) {
+		return NewReaderLexer(bufio.NewReader(f))
+	})
+}
+
+func BenchmarkStringLex10000(b *testing.B) {
+	benchmarkLex(b, func() (*Lexer, error) {
+		return NewStringLexer(lexBenchString10000)
+	})
+}
+
+func BenchmarkReaderLex10000(b *testing.B) {
+	benchmarkLex(b, func() (*Lexer, error) {
+		return NewReaderLexer(strings.NewReader(lexBenchString10000))
+	})
+}
+
+func BenchmarkFileReaderLex10000(b *testing.B) {
+	f, err := os.Open("test_data/testScan10000")
+	if err != nil {
+		b.Fatal(err)
+	}
+	benchmarkLex(b, func() (*Lexer, error) {
+		return NewReaderLexer(bufio.NewReader(f))
+	})
 }

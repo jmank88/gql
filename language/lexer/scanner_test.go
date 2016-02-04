@@ -94,15 +94,16 @@ func TestStringScanner(t *testing.T) {
 }
 
 var (
-	testString100   = testString(100)
-	testString1000  = testString(1000)
-	testString10000 = testString(10000)
+	scanBenchString100 = scanBenchString(100)
+	scanBenchString1000 = scanBenchString(1000)
+	scanBenchString10000 = scanBenchString(10000)
 )
 
-func testString(n int) string {
+//TODO randomize this?
+func scanBenchString(n int) string {
 	b := &bytes.Buffer{}
 	for i := 0; i < n; i++ {
-		b.WriteRune('A') //TODO randomize this?
+		b.WriteRune('A')
 	}
 	return b.String()
 }
@@ -141,13 +142,13 @@ func benchmarkTailScan(b *testing.B, initScanner func() Scanner) {
 
 func BenchmarkStringScan100(b *testing.B) {
 	benchmarkScan(b, func() Scanner {
-		return &stringScanner{source: testString100}
+		return &stringScanner{source: scanBenchString100}
 	})
 }
 
 func BenchmarkReaderScan100(b *testing.B) {
 	benchmarkScan(b, func() Scanner {
-		return &bufferedScanner{source: bufio.NewReader(strings.NewReader(testString100))}
+		return &bufferedScanner{source: bufio.NewReader(strings.NewReader(scanBenchString100))}
 	})
 }
 
@@ -163,13 +164,13 @@ func BenchmarkFileReaderScan100(b *testing.B) {
 
 func BenchmarkStringScan1000(b *testing.B) {
 	benchmarkScan(b, func() Scanner {
-		return &stringScanner{source: testString1000}
+		return &stringScanner{source: scanBenchString1000}
 	})
 }
 
 func BenchmarkReaderScan1000(b *testing.B) {
 	benchmarkScan(b, func() Scanner {
-		return &bufferedScanner{source: bufio.NewReader(strings.NewReader(testString1000))}
+		return &bufferedScanner{source: bufio.NewReader(strings.NewReader(scanBenchString1000))}
 	})
 }
 
@@ -185,13 +186,13 @@ func BenchmarkFileReaderScan1000(b *testing.B) {
 
 func BenchmarkStringScan10000(b *testing.B) {
 	benchmarkScan(b, func() Scanner {
-		return &stringScanner{source: testString10000}
+		return &stringScanner{source: scanBenchString10000}
 	})
 }
 
 func BenchmarkReaderScan10000(b *testing.B) {
 	benchmarkScan(b, func() Scanner {
-		return &bufferedScanner{source: bufio.NewReader(strings.NewReader(testString10000))}
+		return &bufferedScanner{source: bufio.NewReader(strings.NewReader(scanBenchString10000))}
 	})
 }
 
@@ -207,13 +208,13 @@ func BenchmarkFileReaderScan10000(b *testing.B) {
 
 func BenchmarkStringTailScan100(b *testing.B) {
 	benchmarkTailScan(b, func() Scanner {
-		return &stringScanner{source: testString100}
+		return &stringScanner{source: scanBenchString100}
 	})
 }
 
 func BenchmarkReaderTailScan100(b *testing.B) {
 	benchmarkTailScan(b, func() Scanner {
-		return &bufferedScanner{source: bufio.NewReader(strings.NewReader(testString100))}
+		return &bufferedScanner{source: bufio.NewReader(strings.NewReader(scanBenchString100))}
 	})
 }
 
@@ -229,13 +230,13 @@ func BenchmarkFileReaderTailScan100(b *testing.B) {
 
 func BenchmarkStringTailScan1000(b *testing.B) {
 	benchmarkTailScan(b, func() Scanner {
-		return &stringScanner{source: testString1000}
+		return &stringScanner{source: scanBenchString1000}
 	})
 }
 
 func BenchmarkReaderTailScan1000(b *testing.B) {
 	benchmarkTailScan(b, func() Scanner {
-		return &bufferedScanner{source: bufio.NewReader(strings.NewReader(testString1000))}
+		return &bufferedScanner{source: bufio.NewReader(strings.NewReader(scanBenchString1000))}
 	})
 }
 
@@ -251,13 +252,13 @@ func BenchmarkFileReaderTailScan1000(b *testing.B) {
 
 func BenchmarkStringTailScan10000(b *testing.B) {
 	benchmarkTailScan(b, func() Scanner {
-		return &stringScanner{source: testString10000}
+		return &stringScanner{source: scanBenchString10000}
 	})
 }
 
 func BenchmarkReaderTailScan10000(b *testing.B) {
 	benchmarkTailScan(b, func() Scanner {
-		return &bufferedScanner{source: bufio.NewReader(strings.NewReader(testString10000))}
+		return &bufferedScanner{source: bufio.NewReader(strings.NewReader(scanBenchString10000))}
 	})
 }
 

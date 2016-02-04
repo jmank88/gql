@@ -5,16 +5,19 @@ A GraphQL library for GoLang. Currently in alpha.
 
 Born out of a port of the reference javascript implementation: https://github.com/graphql/graphql-js
 
-- [x] ast
-  - [x] tests
-- [x] lexer
-  - [x] tests
-  - [ ] benchmarks
-  - [ ] example
-- [x] parser
-  - [x] tests
-  - [ ] benchmarks
-  - [ ] example
+- [ ] language
+  - [x] ast
+    - [ ] visitor
+    - [ ] printer
+  - [x] lexer
+    - [x] tests
+    - [x] benchmarks
+    - [ ] example
+  - [x] parser
+    - [x] tests
+    - [ ] benchmarks
+    - [ ] example
 - [ ] validation
+- [ ] execution
 - [ ] server
 - [ ] client
