@@ -93,8 +93,6 @@ func TestStringScanner(t *testing.T) {
 	}
 }
 
-//TODO rename to ReaderScan?
-//TODO add FileReader{Tail?}Scan variants
 var (
 	testString100   = testString(100)
 	testString1000  = testString(1000)
