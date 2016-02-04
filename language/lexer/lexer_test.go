@@ -1,8 +1,8 @@
 package lexer
 
 import (
-	"bytes"
 	"bufio"
+	"bytes"
 	"os"
 	"strings"
 	"testing"
@@ -444,8 +444,8 @@ func TestReadToken(t *testing.T) {
 }
 
 var (
-	lexBenchString100 = lexBenchString(100)
-	lexBenchString1000 = lexBenchString(1000)
+	lexBenchString100   = lexBenchString(100)
+	lexBenchString1000  = lexBenchString(1000)
 	lexBenchString10000 = lexBenchString(10000)
 )
 
@@ -453,7 +453,7 @@ var (
 func lexBenchString(n int) string {
 	b := &bytes.Buffer{}
 	for i := 0; i < n; i++ {
-		if i + 10 < n {
+		if i+10 < n {
 			// 10 runes at once
 			b.WriteString("  ASDFGHJK")
 			i += 9

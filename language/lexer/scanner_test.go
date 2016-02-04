@@ -94,8 +94,8 @@ func TestStringScanner(t *testing.T) {
 }
 
 var (
-	scanBenchString100 = scanBenchString(100)
-	scanBenchString1000 = scanBenchString(1000)
+	scanBenchString100   = scanBenchString(100)
+	scanBenchString1000  = scanBenchString(1000)
 	scanBenchString10000 = scanBenchString(10000)
 )
 
