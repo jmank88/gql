@@ -1,10 +1,10 @@
 package lexer
 
 import (
-	"testing"
+	"bufio"
 	"io"
 	"strings"
-	"bufio"
+	"testing"
 )
 
 func TestBufferedTokenScanner(t *testing.T) {

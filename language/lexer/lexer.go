@@ -10,8 +10,9 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
-	. "github.com/jmank88/gql/language/errors"
 	"io"
+
+	. "github.com/jmank88/gql/language/errors"
 )
 
 // A Lexer reads tokens from a source using a Scanner.

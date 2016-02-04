@@ -5,11 +5,11 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/kr/pretty"
+
 	"github.com/jmank88/gql/language/ast"
 	. "github.com/jmank88/gql/language/errors"
 	"github.com/jmank88/gql/language/lexer"
-
-	"github.com/kr/pretty"
 )
 
 func TestAdvance(t *testing.T) {
@@ -2244,30 +2244,29 @@ func TestInterfaceTypeDef(t *testing.T) {
 }
 
 func TestParseUnionTypeDef(t *testing.T) {
-	for _, testCase := range []struct{
-		input string
+	for _, testCase := range []struct {
+		input    string
 		expected *ast.UnionTypeDef
-	} {
+	}{
 		{
 			"union foo = bar",
 			&ast.UnionTypeDef{
 				ast.Loc{0, 14},
-				ast.Name{ast.Loc{6, 8},"foo"},
+				ast.Name{ast.Loc{6, 8}, "foo"},
 				[]ast.NamedType{
-					{ast.Loc{Start:12, End:14},"bar"},
+					{ast.Loc{Start: 12, End: 14}, "bar"},
 				},
-
 			},
 		},
 		{
 			"union foo = bar | fizz | buzz",
 			&ast.UnionTypeDef{
 				ast.Loc{0, 28},
-				ast.Name{ast.Loc{6, 8},"foo"},
+				ast.Name{ast.Loc{6, 8}, "foo"},
 				[]ast.NamedType{
-					{ast.Loc{Start:12, End:14},"bar"},
-					{ast.Loc{Start:18, End:21},"fizz"},
-					{ast.Loc{Start:25, End:28},"buzz"},
+					{ast.Loc{Start: 12, End: 14}, "bar"},
+					{ast.Loc{Start: 18, End: 21}, "fizz"},
+					{ast.Loc{Start: 25, End: 28}, "buzz"},
 				},
 			},
 		},
@@ -2286,23 +2285,23 @@ func TestParseUnionTypeDef(t *testing.T) {
 }
 
 func TestParseUnionMembers(t *testing.T) {
-	for _, testCase := range []struct{
-		input string
+	for _, testCase := range []struct {
+		input    string
 		expected []ast.NamedType
-	} {
+	}{
 		{
 			"foo",
 			[]ast.NamedType{
-					{ast.Loc{0, 2},"foo"},
+				{ast.Loc{0, 2}, "foo"},
 			},
 		},
 		{
 			"foo | bar | fizz | buzz",
 			[]ast.NamedType{
-				{ast.Loc{0, 2},"foo"},
-				{ast.Loc{6, 8},"bar"},
-				{ast.Loc{12, 15},"fizz"},
-				{ast.Loc{19, 22},"buzz"},
+				{ast.Loc{0, 2}, "foo"},
+				{ast.Loc{6, 8}, "bar"},
+				{ast.Loc{12, 15}, "fizz"},
+				{ast.Loc{19, 22}, "buzz"},
 			},
 		},
 	} {
@@ -2324,7 +2323,7 @@ func TestParseScalarTypeDef(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	expected := &ast.ScalarTypeDef{ast.Loc{0,9}, ast.Name{ast.Loc{7,9}, "foo"}}
+	expected := &ast.ScalarTypeDef{ast.Loc{0, 9}, ast.Name{ast.Loc{7, 9}, "foo"}}
 	if actual, err := p.parseScalarTypeDef(); err != nil {
 		t.Errorf("unexpected error: %s", err)
 	} else if !reflect.DeepEqual(actual, expected) {
@@ -2339,9 +2338,9 @@ func TestParseEnumTypeDef(t *testing.T) {
 		t.Fatal(err)
 	}
 	expected := &ast.EnumTypeDef{
-		ast.Loc{0,14},
-		ast.Name{ast.Loc{5,7}, "foo"},
-		[]ast.EnumValueDef{{ast.Loc{10,12}, "bar"}},
+		ast.Loc{0, 14},
+		ast.Name{ast.Loc{5, 7}, "foo"},
+		[]ast.EnumValueDef{{ast.Loc{10, 12}, "bar"}},
 	}
 	if actual, err := p.parseEnumTypeDef(); err != nil {
 		t.Errorf("unexpected error: %s", err)
@@ -2356,7 +2355,7 @@ func TestParseEnumValueDef(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	expected := &ast.EnumValueDef{ast.Loc{0,2}, "foo"}
+	expected := &ast.EnumValueDef{ast.Loc{0, 2}, "foo"}
 	actual := new(ast.EnumValueDef)
 	if err := p.parseEnumValueDef(actual); err != nil {
 		t.Errorf("unexpected error: %s", err)
@@ -2367,20 +2366,20 @@ func TestParseEnumValueDef(t *testing.T) {
 }
 
 func TestParseInputObjTypeDef(t *testing.T) {
-	for _, testCase := range []struct{
-		input string
+	for _, testCase := range []struct {
+		input    string
 		expected *ast.InputObjTypeDef
-	} {
+	}{
 		{
 			"input foo {bar:int}",
 			&ast.InputObjTypeDef{
-				ast.Loc{0,19},
-				ast.Name{ast.Loc{6,8}, "foo"},
+				ast.Loc{0, 19},
+				ast.Name{ast.Loc{6, 8}, "foo"},
 				[]ast.InputValueDef{
 					{
-						Loc:  ast.Loc{11, 17},
-						Name: ast.Name{ast.Loc{11, 13},"bar"},
-						RefType: &ast.NamedType{ast.Loc{15, 17},"int"},
+						Loc:     ast.Loc{11, 17},
+						Name:    ast.Name{ast.Loc{11, 13}, "bar"},
+						RefType: &ast.NamedType{ast.Loc{15, 17}, "int"},
 					},
 				},
 			},
@@ -2388,25 +2387,24 @@ func TestParseInputObjTypeDef(t *testing.T) {
 		{
 			"input foo {bar: int, fizz: boolean, buzz: string}",
 			&ast.InputObjTypeDef{
-				ast.Loc{0,49},
-				ast.Name{ast.Loc{6,8}, "foo"},
+				ast.Loc{0, 49},
+				ast.Name{ast.Loc{6, 8}, "foo"},
 				[]ast.InputValueDef{
 					{
-						Loc:  ast.Loc{11, 18},
-						Name: ast.Name{ast.Loc{11, 13},"bar"},
-						RefType: &ast.NamedType{ast.Loc{16, 18},"int"},
+						Loc:     ast.Loc{11, 18},
+						Name:    ast.Name{ast.Loc{11, 13}, "bar"},
+						RefType: &ast.NamedType{ast.Loc{16, 18}, "int"},
 					},
 					{
-						Loc:  ast.Loc{21, 33},
-						Name: ast.Name{ast.Loc{21, 24},"fizz"},
-						RefType: &ast.NamedType{ast.Loc{27, 33},"boolean"},
+						Loc:     ast.Loc{21, 33},
+						Name:    ast.Name{ast.Loc{21, 24}, "fizz"},
+						RefType: &ast.NamedType{ast.Loc{27, 33}, "boolean"},
 					},
 					{
-						Loc:  ast.Loc{36, 47},
-						Name: ast.Name{ast.Loc{36, 39},"buzz"},
-						RefType: &ast.NamedType{ast.Loc{42, 47},"string"},
+						Loc:     ast.Loc{36, 47},
+						Name:    ast.Name{ast.Loc{36, 39}, "buzz"},
+						RefType: &ast.NamedType{ast.Loc{42, 47}, "string"},
 					},
-
 				},
 			},
 		},
@@ -2430,8 +2428,8 @@ func TestParseTypeExtDef(t *testing.T) {
 		t.Fatal(err)
 	}
 	expected := &ast.TypeExtDef{
-		Loc: ast.Loc{0,18},
-		Name: ast.Name{ast.Loc{12,14}, "foo"},
+		Loc:  ast.Loc{0, 18},
+		Name: ast.Name{ast.Loc{12, 14}, "foo"},
 	}
 	if actual, err := p.parseTypeExtDef(); err != nil {
 		t.Errorf("unexpected error: %s", err)
