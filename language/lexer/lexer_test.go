@@ -13,23 +13,14 @@ import (
 func TestReadName(t *testing.T) {
 	var token Token
 	for _, testCase := range []struct {
-		name     string
+		input    string
 		expected Token
 	}{
-		{
-			name:     "test",
-			expected: Token{Name, 0, 3, "test"},
-		},
-		{
-			name:     "aSdF1234",
-			expected: Token{Name, 0, 7, "aSdF1234"},
-		},
-		{
-			name:     "_aSdF_1234",
-			expected: Token{Name, 0, 9, "_aSdF_1234"},
-		},
+		{"test", Token{Name, 0, 3, "test"}},
+		{"aSdF1234", Token{Name, 0, 7, "aSdF1234"}},
+		{"_aSdF_1234", Token{Name, 0, 9, "_aSdF_1234"}},
 	} {
-		l, err := NewStringLexer(testCase.name)
+		l, err := NewStringLexer(testCase.input)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -45,59 +36,26 @@ func TestReadName(t *testing.T) {
 func TestReadString(t *testing.T) {
 	var token Token
 	for _, testCase := range []struct {
-		string
+		input    string
 		expected Token
 	}{
-		{
-			string:   `"test"`,
-			expected: Token{String, 0, 5, "test"},
-		},
-		{
-			string:   `"1234asdf" `,
-			expected: Token{String, 0, 9, "1234asdf"},
-		},
+		{`"test"`, Token{String, 0, 5, "test"}},
+		{`"1234asdf" `, Token{String, 0, 9, "1234asdf"}},
 
 		// Escaped characters.
-		{
-			string:   `"\""`,
-			expected: Token{String, 0, 3, `"`},
-		},
-		{
-			string:   `"\/"`,
-			expected: Token{String, 0, 3, `/`},
-		},
-		{
-			string:   `"\\"`,
-			expected: Token{String, 0, 3, `\`},
-		},
-		{
-			string:   `"\b"`,
-			expected: Token{String, 0, 3, "\b"},
-		},
-		{
-			string:   `"\f"`,
-			expected: Token{String, 0, 3, "\f"},
-		},
-		{
-			string:   `"\n"`,
-			expected: Token{String, 0, 3, "\n"},
-		},
-		{
-			string:   `"\r"`,
-			expected: Token{String, 0, 3, "\r"},
-		},
-		{
-			string:   `"\t"`,
-			expected: Token{String, 0, 3, "\t"},
-		},
+		{`"\""`, Token{String, 0, 3, `"`}},
+		{`"\/"`, Token{String, 0, 3, `/`}},
+		{`"\\"`, Token{String, 0, 3, `\`}},
+		{`"\b"`, Token{String, 0, 3, "\b"}},
+		{`"\f"`, Token{String, 0, 3, "\f"}},
+		{`"\n"`, Token{String, 0, 3, "\n"}},
+		{`"\r"`, Token{String, 0, 3, "\r"}},
+		{`"\t"`, Token{String, 0, 3, "\t"}},
 
 		// Unicode characters.
-		{
-			string:   `"\u00E1"`,
-			expected: Token{String, 0, 7, "á"},
-		},
+		{`"\u00E1"`, Token{String, 0, 7, "á"}},
 	} {
-		l, err := NewStringLexer(testCase.string)
+		l, err := NewStringLexer(testCase.input)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -105,59 +63,35 @@ func TestReadString(t *testing.T) {
 			t.Fatal(testCase, err)
 		}
 		if token != testCase.expected {
-			t.Errorf("case: %s; expected %v but got %v", testCase.string, testCase.expected, token)
+			t.Errorf("case: %s; expected %v but got %v", testCase.input, testCase.expected, token)
 		}
 	}
 
 	// Errors.
 	for _, testCase := range []struct {
-		string
+		input         string
 		expectedIndex int
 	}{
-		{
-			string:        `"`,
-			expectedIndex: 1,
-		},
-		{
-			string:        "\"\n",
-			expectedIndex: 1,
-		},
-		{
-			string:        "\"\r",
-			expectedIndex: 1,
-		},
-		{
-			string:        "\"\b",
-			expectedIndex: 1,
-		},
-		{
-			string:        "\"\f",
-			expectedIndex: 1,
-		},
-		{
-			string:        "\"\\u12",
-			expectedIndex: 5,
-		},
-		{
-			string:        "\"\\uGGGG",
-			expectedIndex: 6,
-		},
-		{
-			string:        `"\8`,
-			expectedIndex: 2,
-		},
+		{`"`, 1},
+		{"\"\n", 1},
+		{"\"\r", 1},
+		{"\"\b", 1},
+		{"\"\f", 1},
+		{"\"\\u12", 5},
+		{"\"\\uGGGG", 6},
+		{`"\8`, 2},
 	} {
-		l, err := NewStringLexer(testCase.string)
+		l, err := NewStringLexer(testCase.input)
 		if err != nil {
 			t.Fatal(err)
 		}
 		if err := l.readString(&token); err == nil {
-			t.Errorf("case %s; expected error at index %d", testCase.string, testCase.expectedIndex)
+			t.Errorf("case %s; expected error at index %d", testCase.input, testCase.expectedIndex)
 		} else if se, ok := err.(*SyntaxError); !ok {
 			t.Errorf("case %s; expected syntaxError, but got: %T: %v", err, err)
 		} else {
 			if se.Pos != testCase.expectedIndex {
-				t.Errorf("case: %s; expected error at index %d but got %d", testCase.string, testCase.expectedIndex, se.Pos)
+				t.Errorf("case: %s; expected error at index %d but got %d", testCase.input, testCase.expectedIndex, se.Pos)
 			}
 		}
 	}
@@ -166,28 +100,19 @@ func TestReadString(t *testing.T) {
 func TestReadNumber(t *testing.T) {
 	var token Token
 	for _, testCase := range []struct {
-		num      string
+		input    string
 		expected Token
 	}{
-		{
-			num:      "123",
-			expected: Token{Int, 0, 2, "123"},
-		},
-		{
-			num:      "-123.4 ",
-			expected: Token{Float, 0, 5, "-123.4"},
-		},
-		{
-			num:      "-1.2e34 ",
-			expected: Token{Float, 0, 6, "-1.2e34"},
-		},
+		{"123", Token{Int, 0, 2, "123"}},
+		{"-123.4 ", Token{Float, 0, 5, "-123.4"}},
+		{"-1.2e34 ", Token{Float, 0, 6, "-1.2e34"}},
 	} {
-		l, err := NewStringLexer(testCase.num)
+		l, err := NewStringLexer(testCase.input)
 		if err != nil {
 			t.Fatal(err)
 		}
 		if err := l.readNumber(&token); err != nil {
-			t.Fatalf("case: %q; unexpected error: %q", testCase.num, err)
+			t.Fatalf("case: %q; unexpected error: %q", testCase.input, err)
 		}
 		if token != testCase.expected {
 			t.Errorf("expected %v but got %v", testCase.expected, token)
@@ -196,37 +121,25 @@ func TestReadNumber(t *testing.T) {
 
 	// Errors.
 	for _, testCase := range []struct {
-		string
+		input         string
 		expectedIndex int
 	}{
-		{
-			string:        "-",
-			expectedIndex: 1,
-		},
-		{
-			string:        "0",
-			expectedIndex: 1,
-		},
-		{
-			string:        "01",
-			expectedIndex: 1,
-		},
-		{
-			string:        "1ea",
-			expectedIndex: 2,
-		},
+		{"-", 1},
+		{"0", 1},
+		{"01", 1},
+		{"1ea", 2},
 	} {
-		l, err := NewStringLexer(testCase.string)
+		l, err := NewStringLexer(testCase.input)
 		if err != nil {
 			t.Fatal(err)
 		}
 		if err := l.readNumber(&token); err == nil {
-			t.Errorf("case %s; expected error at index %d", testCase.string, testCase.expectedIndex)
+			t.Errorf("case %s; expected error at index %d", testCase.input, testCase.expectedIndex)
 		} else if se, ok := err.(*SyntaxError); !ok {
 			t.Errorf("case %s; expected syntaxError, but got: %T: %v", err, err)
 		} else {
 			if se.Pos != testCase.expectedIndex {
-				t.Errorf("case: %s; expected error at index %d but got %v", testCase.string, testCase.expectedIndex, se)
+				t.Errorf("case: %s; expected error at index %d but got %v", testCase.input, testCase.expectedIndex, se)
 			}
 		}
 	}
@@ -234,19 +147,13 @@ func TestReadNumber(t *testing.T) {
 
 func TestAdvanceDigits(t *testing.T) {
 	for _, testCase := range []struct {
-		num      string
+		input    string
 		expected int
 	}{
-		{
-			num:      "123",
-			expected: 3,
-		},
-		{
-			num:      "12304 ",
-			expected: 5,
-		},
+		{"123", 3},
+		{"12304 ", 5},
 	} {
-		l, err := NewStringLexer(testCase.num)
+		l, err := NewStringLexer(testCase.input)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -261,30 +168,18 @@ func TestAdvanceDigits(t *testing.T) {
 
 func TestAdvanceWhitespace(t *testing.T) {
 	for _, testCase := range []struct {
-		str      string
+		input    string
 		expected int
 	}{
-		{
-			str:      "   ",
-			expected: 3,
-		},
-		{
-			str:      "     123",
-			expected: 5,
-		},
-		{
-			str: `
-			`,
-			expected: 4,
-		},
-		{
-			str: `
+		{"   ", 3},
+		{"     123", 5},
+		{`
+			`, 4},
+		{`
 			# 	 a comment
-			asdf`,
-			expected: 21,
-		},
+			asdf`, 21},
 	} {
-		l, err := NewStringLexer(testCase.str)
+		l, err := NewStringLexer(testCase.input)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -347,87 +242,26 @@ func TestReadToken(t *testing.T) {
 		expected Token
 	}
 	for _, testCase := range []test{
-		{
-			"123",
-			Token{Int, 0, 2, "123"},
-		},
-		{
-			"",
-			Token{EOF, 0, 0, ""},
-		},
-		{
-			"   ",
-			Token{EOF, 3, 3, ""},
-		},
-		{
-			"   123",
-			Token{Int, 3, 5, "123"},
-		},
-		{
-			"   123   ",
-			Token{Int, 3, 5, "123"},
-		},
-
-		{
-			" ! ",
-			Token{Bang, 1, 2, "!"},
-		},
-		{
-			" $ ",
-			Token{Dollar, 1, 2, "$"},
-		},
-		{
-			" ( ",
-			Token{ParenL, 1, 2, "("},
-		},
-		{
-			" ) ",
-			Token{ParenR, 1, 2, ")"},
-		},
-		{
-			" ... ",
-			Token{Spread, 1, 4, "..."},
-		},
-		{
-			" : ",
-			Token{Colon, 1, 2, ":"},
-		},
-		{
-			" = ",
-			Token{Equals, 1, 2, "="},
-		},
-		{
-			" @ ",
-			Token{At, 1, 2, "@"},
-		},
-		{
-			" [ ",
-			Token{BracketL, 1, 2, "["},
-		},
-		{
-			" ] ",
-			Token{BracketR, 1, 2, "]"},
-		},
-		{
-			" { ",
-			Token{BraceL, 1, 2, "{"},
-		},
-		{
-			" | ",
-			Token{Pipe, 1, 2, "|"},
-		},
-		{
-			" } ",
-			Token{BraceR, 1, 2, "}"},
-		},
-		{
-			" 1.0 ",
-			Token{Float, 1, 3, "1.0"},
-		},
-		{
-			` "test" `,
-			Token{String, 1, 6, "test"},
-		},
+		{"123", Token{Int, 0, 2, "123"}},
+		{"", Token{EOF, 0, 0, ""}},
+		{"   ", Token{EOF, 3, 3, ""}},
+		{"   123", Token{Int, 3, 5, "123"}},
+		{"   123   ", Token{Int, 3, 5, "123"}},
+		{" ! ", Token{Bang, 1, 2, "!"}},
+		{" $ ", Token{Dollar, 1, 2, "$"}},
+		{" ( ", Token{ParenL, 1, 2, "("}},
+		{" ) ", Token{ParenR, 1, 2, ")"}},
+		{" ... ", Token{Spread, 1, 4, "..."}},
+		{" : ", Token{Colon, 1, 2, ":"}},
+		{" = ", Token{Equals, 1, 2, "="}},
+		{" @ ", Token{At, 1, 2, "@"}},
+		{" [ ", Token{BracketL, 1, 2, "["}},
+		{" ] ", Token{BracketR, 1, 2, "]"}},
+		{" { ", Token{BraceL, 1, 2, "{"}},
+		{" | ", Token{Pipe, 1, 2, "|"}},
+		{" } ", Token{BraceR, 1, 2, "}"}},
+		{" 1.0 ", Token{Float, 1, 3, "1.0"}},
+		{` "test" `, Token{String, 1, 6, "test"}},
 	} {
 		l, err := NewStringLexer(testCase.input)
 		if err != nil {
@@ -464,7 +298,7 @@ func lexBenchString(n int) string {
 	return b.String()
 }
 
-func benchmarkLex(b *testing.B, initLexer func() (*Lexer, error)) {
+func benchLex(b *testing.B, initLexer func() (*Lexer, error)) {
 	for n := 0; n < b.N; n++ {
 		l, err := initLexer()
 		if err != nil {
@@ -483,71 +317,37 @@ func benchmarkLex(b *testing.B, initLexer func() (*Lexer, error)) {
 	}
 }
 
-func BenchmarkStringLex100(b *testing.B) {
-	benchmarkLex(b, func() (*Lexer, error) {
-		return NewStringLexer(lexBenchString100)
-	})
+func stringLexer(source string) func() (*Lexer, error) {
+	return func() (*Lexer, error) {
+		return NewStringLexer(source)
+	}
 }
 
-func BenchmarkReaderLex100(b *testing.B) {
-	benchmarkLex(b, func() (*Lexer, error) {
-		return NewReaderLexer(strings.NewReader(lexBenchString100))
-	})
+func BenchmarkStringLex100(b *testing.B)   { benchLex(b, stringLexer(lexBenchString100)) }
+func BenchmarkStringLex1000(b *testing.B)  { benchLex(b, stringLexer(lexBenchString1000)) }
+func BenchmarkStringLex10000(b *testing.B) { benchLex(b, stringLexer(lexBenchString10000)) }
+
+func readerLexer(source string) func() (*Lexer, error) {
+	return func() (*Lexer, error) {
+		return NewReaderLexer(strings.NewReader(source))
+	}
 }
 
-func BenchmarkFileReaderLex100(b *testing.B) {
-	f, err := os.Open("test_data/testScan100")
+func BenchmarkReaderLex100(b *testing.B)   { benchLex(b, readerLexer(lexBenchString100)) }
+func BenchmarkReaderLex1000(b *testing.B)  { benchLex(b, readerLexer(lexBenchString1000)) }
+func BenchmarkReaderLex10000(b *testing.B) { benchLex(b, readerLexer(lexBenchString10000)) }
+
+func lexFile(b *testing.B, filename string) {
+	f, err := os.Open(filename)
 	if err != nil {
 		b.Fatal(err)
 	}
 	defer f.Close()
-	benchmarkLex(b, func() (*Lexer, error) {
+	benchLex(b, func() (*Lexer, error) {
 		return NewReaderLexer(bufio.NewReader(f))
 	})
 }
 
-func BenchmarkStringLex1000(b *testing.B) {
-	benchmarkLex(b, func() (*Lexer, error) {
-		return NewStringLexer(lexBenchString1000)
-	})
-}
-
-func BenchmarkReaderLex1000(b *testing.B) {
-	benchmarkLex(b, func() (*Lexer, error) {
-		return NewReaderLexer(strings.NewReader(lexBenchString1000))
-	})
-}
-
-func BenchmarkFileReaderLex1000(b *testing.B) {
-	f, err := os.Open("test_data/testScan1000")
-	if err != nil {
-		b.Fatal(err)
-	}
-	defer f.Close()
-	benchmarkLex(b, func() (*Lexer, error) {
-		return NewReaderLexer(bufio.NewReader(f))
-	})
-}
-
-func BenchmarkStringLex10000(b *testing.B) {
-	benchmarkLex(b, func() (*Lexer, error) {
-		return NewStringLexer(lexBenchString10000)
-	})
-}
-
-func BenchmarkReaderLex10000(b *testing.B) {
-	benchmarkLex(b, func() (*Lexer, error) {
-		return NewReaderLexer(strings.NewReader(lexBenchString10000))
-	})
-}
-
-func BenchmarkFileReaderLex10000(b *testing.B) {
-	f, err := os.Open("test_data/testScan10000")
-	if err != nil {
-		b.Fatal(err)
-	}
-	defer f.Close()
-	benchmarkLex(b, func() (*Lexer, error) {
-		return NewReaderLexer(bufio.NewReader(f))
-	})
-}
+func BenchmarkFileReaderLex100(b *testing.B)   { lexFile(b, "test_data/testScan100") }
+func BenchmarkFileReaderLex1000(b *testing.B)  { lexFile(b, "test_data/testScan1000") }
+func BenchmarkFileReaderLex10000(b *testing.B) { lexFile(b, "test_data/testScan10000") }

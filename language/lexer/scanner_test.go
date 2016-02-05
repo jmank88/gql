@@ -108,7 +108,7 @@ func scanBenchString(n int) string {
 	return b.String()
 }
 
-func benchmarkScan(b *testing.B, initScanner func() Scanner) {
+func scan(b *testing.B, initScanner func() Scanner) {
 	for n := 0; n < b.N; n++ {
 		s := initScanner()
 
@@ -122,7 +122,7 @@ func benchmarkScan(b *testing.B, initScanner func() Scanner) {
 	}
 }
 
-func benchmarkTailScan(b *testing.B, initScanner func() Scanner) {
+func tailScan(b *testing.B, initScanner func() Scanner) {
 	for n := 0; n < b.N; n++ {
 		s := initScanner()
 
@@ -140,140 +140,60 @@ func benchmarkTailScan(b *testing.B, initScanner func() Scanner) {
 	}
 }
 
-func BenchmarkStringScan100(b *testing.B) {
-	benchmarkScan(b, func() Scanner {
-		return &stringScanner{source: scanBenchString100}
-	})
+func strScanner(source string) func() Scanner {
+	return func() Scanner {
+		return &stringScanner{source: source}
+	}
 }
 
-func BenchmarkReaderScan100(b *testing.B) {
-	benchmarkScan(b, func() Scanner {
-		return &bufferedScanner{source: bufio.NewReader(strings.NewReader(scanBenchString100))}
-	})
+func BenchmarkStringScan100(b *testing.B)   { scan(b, strScanner(scanBenchString100)) }
+func BenchmarkStringScan1000(b *testing.B)  { scan(b, strScanner(scanBenchString1000)) }
+func BenchmarkStringScan10000(b *testing.B) { scan(b, strScanner(scanBenchString10000)) }
+
+func readerScanner(source string) func() Scanner {
+	return func() Scanner {
+		return &bufferedScanner{source: bufio.NewReader(strings.NewReader(source))}
+	}
 }
 
-func BenchmarkFileReaderScan100(b *testing.B) {
-	f, err := os.Open("test_data/testScan100")
+func BenchmarkReaderScan100(b *testing.B)   { scan(b, readerScanner(scanBenchString100)) }
+func BenchmarkReaderScan1000(b *testing.B)  { scan(b, readerScanner(scanBenchString1000)) }
+func BenchmarkReaderScan10000(b *testing.B) { scan(b, readerScanner(scanBenchString10000)) }
+
+func scanFile(b *testing.B, filename string) {
+	f, err := os.Open(filename)
 	if err != nil {
 		b.Fatal(err)
 	}
 	defer f.Close()
-	benchmarkScan(b, func() Scanner {
+	scan(b, func() Scanner {
 		return &bufferedScanner{source: bufio.NewReader(f)}
 	})
 }
 
-func BenchmarkStringScan1000(b *testing.B) {
-	benchmarkScan(b, func() Scanner {
-		return &stringScanner{source: scanBenchString1000}
-	})
-}
+func BenchmarkFileReaderScan100(b *testing.B)   { scanFile(b, "test_data/testScan100") }
+func BenchmarkFileReaderScan1000(b *testing.B)  { scanFile(b, "test_data/testScan1000") }
+func BenchmarkFileReaderScan10000(b *testing.B) { scanFile(b, "test_data/testScan10000") }
 
-func BenchmarkReaderScan1000(b *testing.B) {
-	benchmarkScan(b, func() Scanner {
-		return &bufferedScanner{source: bufio.NewReader(strings.NewReader(scanBenchString1000))}
-	})
-}
+func BenchmarkStringTailScan100(b *testing.B)   { tailScan(b, strScanner(scanBenchString100)) }
+func BenchmarkStringTailScan1000(b *testing.B)  { tailScan(b, strScanner(scanBenchString1000)) }
+func BenchmarkStringTailScan10000(b *testing.B) { tailScan(b, strScanner(scanBenchString10000)) }
 
-func BenchmarkFileReaderScan1000(b *testing.B) {
-	f, err := os.Open("test_data/testScan1000")
+func BenchmarkReaderTailScan100(b *testing.B)   { tailScan(b, readerScanner(scanBenchString100)) }
+func BenchmarkReaderTailScan1000(b *testing.B)  { tailScan(b, readerScanner(scanBenchString1000)) }
+func BenchmarkReaderTailScan10000(b *testing.B) { tailScan(b, readerScanner(scanBenchString10000)) }
+
+func tailScanFile(b *testing.B, filename string) {
+	f, err := os.Open(filename)
 	if err != nil {
 		b.Fatal(err)
 	}
 	defer f.Close()
-	benchmarkScan(b, func() Scanner {
+	tailScan(b, func() Scanner {
 		return &bufferedScanner{source: bufio.NewReader(f)}
 	})
 }
 
-func BenchmarkStringScan10000(b *testing.B) {
-	benchmarkScan(b, func() Scanner {
-		return &stringScanner{source: scanBenchString10000}
-	})
-}
-
-func BenchmarkReaderScan10000(b *testing.B) {
-	benchmarkScan(b, func() Scanner {
-		return &bufferedScanner{source: bufio.NewReader(strings.NewReader(scanBenchString10000))}
-	})
-}
-
-func BenchmarkFileReaderScan10000(b *testing.B) {
-	f, err := os.Open("test_data/testScan10000")
-	if err != nil {
-		b.Fatal(err)
-	}
-	defer f.Close()
-	benchmarkScan(b, func() Scanner {
-		return &bufferedScanner{source: bufio.NewReader(f)}
-	})
-}
-
-func BenchmarkStringTailScan100(b *testing.B) {
-	benchmarkTailScan(b, func() Scanner {
-		return &stringScanner{source: scanBenchString100}
-	})
-}
-
-func BenchmarkReaderTailScan100(b *testing.B) {
-	benchmarkTailScan(b, func() Scanner {
-		return &bufferedScanner{source: bufio.NewReader(strings.NewReader(scanBenchString100))}
-	})
-}
-
-func BenchmarkFileReaderTailScan100(b *testing.B) {
-	f, err := os.Open("test_data/testScan100")
-	if err != nil {
-		b.Fatal(err)
-	}
-	defer f.Close()
-	benchmarkTailScan(b, func() Scanner {
-		return &bufferedScanner{source: bufio.NewReader(f)}
-	})
-}
-
-func BenchmarkStringTailScan1000(b *testing.B) {
-	benchmarkTailScan(b, func() Scanner {
-		return &stringScanner{source: scanBenchString1000}
-	})
-}
-
-func BenchmarkReaderTailScan1000(b *testing.B) {
-	benchmarkTailScan(b, func() Scanner {
-		return &bufferedScanner{source: bufio.NewReader(strings.NewReader(scanBenchString1000))}
-	})
-}
-
-func BenchmarkFileReaderTailScan1000(b *testing.B) {
-	f, err := os.Open("test_data/testScan1000")
-	if err != nil {
-		b.Fatal(err)
-	}
-	defer f.Close()
-	benchmarkTailScan(b, func() Scanner {
-		return &bufferedScanner{source: bufio.NewReader(f)}
-	})
-}
-
-func BenchmarkStringTailScan10000(b *testing.B) {
-	benchmarkTailScan(b, func() Scanner {
-		return &stringScanner{source: scanBenchString10000}
-	})
-}
-
-func BenchmarkReaderTailScan10000(b *testing.B) {
-	benchmarkTailScan(b, func() Scanner {
-		return &bufferedScanner{source: bufio.NewReader(strings.NewReader(scanBenchString10000))}
-	})
-}
-
-func BenchmarkFileReaderTailScan10000(b *testing.B) {
-	f, err := os.Open("test_data/testScan10000")
-	if err != nil {
-		b.Fatal(err)
-	}
-	defer f.Close()
-	benchmarkTailScan(b, func() Scanner {
-		return &bufferedScanner{source: bufio.NewReader(f)}
-	})
-}
+func BenchmarkFileReaderTailScan100(b *testing.B)   { tailScanFile(b, "test_data/testScan100") }
+func BenchmarkFileReaderTailScan1000(b *testing.B)  { tailScanFile(b, "test_data/testScan1000") }
+func BenchmarkFileReaderTailScan10000(b *testing.B) { tailScanFile(b, "test_data/testScan10000") }
