@@ -278,9 +278,10 @@ func TestReadToken(t *testing.T) {
 }
 
 var (
-	lexBenchString100   = lexBenchString(100)
-	lexBenchString1000  = lexBenchString(1000)
-	lexBenchString10000 = lexBenchString(10000)
+	lexBenchString100    = lexBenchString(100)
+	lexBenchString1000   = lexBenchString(1000)
+	lexBenchString10000  = lexBenchString(10000)
+	lexBenchString100000 = lexBenchString(100000)
 )
 
 //TODO randomize this?
@@ -323,9 +324,10 @@ func stringLexer(source string) func() (*Lexer, error) {
 	}
 }
 
-func BenchmarkStringLex100(b *testing.B)   { benchLex(b, stringLexer(lexBenchString100)) }
-func BenchmarkStringLex1000(b *testing.B)  { benchLex(b, stringLexer(lexBenchString1000)) }
-func BenchmarkStringLex10000(b *testing.B) { benchLex(b, stringLexer(lexBenchString10000)) }
+func BenchmarkLexString100(b *testing.B)    { benchLex(b, stringLexer(lexBenchString100)) }
+func BenchmarkLexString1000(b *testing.B)   { benchLex(b, stringLexer(lexBenchString1000)) }
+func BenchmarkLexString10000(b *testing.B)  { benchLex(b, stringLexer(lexBenchString10000)) }
+func BenchmarkLexString100000(b *testing.B) { benchLex(b, stringLexer(lexBenchString100000)) }
 
 func readerLexer(source string) func() (*Lexer, error) {
 	return func() (*Lexer, error) {
@@ -333,9 +335,10 @@ func readerLexer(source string) func() (*Lexer, error) {
 	}
 }
 
-func BenchmarkReaderLex100(b *testing.B)   { benchLex(b, readerLexer(lexBenchString100)) }
-func BenchmarkReaderLex1000(b *testing.B)  { benchLex(b, readerLexer(lexBenchString1000)) }
-func BenchmarkReaderLex10000(b *testing.B) { benchLex(b, readerLexer(lexBenchString10000)) }
+func BenchmarkLexReader100(b *testing.B)    { benchLex(b, readerLexer(lexBenchString100)) }
+func BenchmarkLexReader1000(b *testing.B)   { benchLex(b, readerLexer(lexBenchString1000)) }
+func BenchmarkLexReader10000(b *testing.B)  { benchLex(b, readerLexer(lexBenchString10000)) }
+func BenchmarkLexReader100000(b *testing.B) { benchLex(b, readerLexer(lexBenchString100000)) }
 
 func lexFile(b *testing.B, filename string) {
 	f, err := os.Open(filename)
@@ -348,6 +351,7 @@ func lexFile(b *testing.B, filename string) {
 	})
 }
 
-func BenchmarkFileReaderLex100(b *testing.B)   { lexFile(b, "test_data/testScan100") }
-func BenchmarkFileReaderLex1000(b *testing.B)  { lexFile(b, "test_data/testScan1000") }
-func BenchmarkFileReaderLex10000(b *testing.B) { lexFile(b, "test_data/testScan10000") }
+func BenchmarkLexFile100(b *testing.B)    { lexFile(b, "test_data/testScan100") }
+func BenchmarkLexFile1000(b *testing.B)   { lexFile(b, "test_data/testScan1000") }
+func BenchmarkLexFile10000(b *testing.B)  { lexFile(b, "test_data/testScan10000") }
+func BenchmarkLexFile100000(b *testing.B) { lexFile(b, "test_data/testScan100000") }
