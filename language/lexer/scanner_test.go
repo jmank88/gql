@@ -157,6 +157,7 @@ func BenchmarkFileReaderScan100(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
+	defer f.Close()
 	benchmarkScan(b, func() Scanner {
 		return &bufferedScanner{source: bufio.NewReader(f)}
 	})
@@ -179,6 +180,7 @@ func BenchmarkFileReaderScan1000(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
+	defer f.Close()
 	benchmarkScan(b, func() Scanner {
 		return &bufferedScanner{source: bufio.NewReader(f)}
 	})
@@ -201,6 +203,7 @@ func BenchmarkFileReaderScan10000(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
+	defer f.Close()
 	benchmarkScan(b, func() Scanner {
 		return &bufferedScanner{source: bufio.NewReader(f)}
 	})
@@ -223,6 +226,7 @@ func BenchmarkFileReaderTailScan100(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
+	defer f.Close()
 	benchmarkTailScan(b, func() Scanner {
 		return &bufferedScanner{source: bufio.NewReader(f)}
 	})
@@ -245,6 +249,7 @@ func BenchmarkFileReaderTailScan1000(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
+	defer f.Close()
 	benchmarkTailScan(b, func() Scanner {
 		return &bufferedScanner{source: bufio.NewReader(f)}
 	})
@@ -267,6 +272,7 @@ func BenchmarkFileReaderTailScan10000(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
+	defer f.Close()
 	benchmarkTailScan(b, func() Scanner {
 		return &bufferedScanner{source: bufio.NewReader(f)}
 	})

@@ -500,6 +500,7 @@ func BenchmarkFileReaderLex100(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
+	defer f.Close()
 	benchmarkLex(b, func() (*Lexer, error) {
 		return NewReaderLexer(bufio.NewReader(f))
 	})
@@ -522,6 +523,7 @@ func BenchmarkFileReaderLex1000(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
+	defer f.Close()
 	benchmarkLex(b, func() (*Lexer, error) {
 		return NewReaderLexer(bufio.NewReader(f))
 	})
@@ -544,6 +546,7 @@ func BenchmarkFileReaderLex10000(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
+	defer f.Close()
 	benchmarkLex(b, func() (*Lexer, error) {
 		return NewReaderLexer(bufio.NewReader(f))
 	})
