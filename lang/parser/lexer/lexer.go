@@ -1,4 +1,4 @@
-// Package lexer implements a GraphQL lexer and scanner for reading tokens from a string or Reader source.
+// package lang implements a GraphQL lexer and scanner for reading tokens from a string or Reader source.
 //
 // Originally ported from the javascript reference implementation:
 // https://github.com/graphql/graphql-js/blob/master/src/language/index.js
@@ -12,12 +12,18 @@ import (
 	"fmt"
 	"io"
 
-	. "github.com/jmank88/gql/language/errors"
+	"github.com/jmank88/gql/lang/parser/lexer/scanner"
+	"github.com/jmank88/gql/lang/parser/lexer/token"
+
+	. "github.com/jmank88/gql/lang/parser/errors"
 )
 
-// A Lexer reads tokens from a source using a Scanner.
-type Lexer struct {
-	scanner Scanner
+// A Lex function parses the next token into t.
+type Lex func(t *token.Token) error
+
+// A lexer reads tokens from a source using a Scanner.
+type lexer struct {
+	scanner scanner.Scanner
 
 	// Last scanned error.
 	err error
@@ -29,38 +35,38 @@ type Lexer struct {
 }
 
 // The NewLexer function returns a new Lexer backed by the scanner s.
-func NewLexer(s Scanner) (*Lexer, error) {
-	l := &Lexer{lastIndex: -1, scanner: s}
+func NewLexer(s scanner.Scanner) (*lexer, error) {
+	l := &lexer{lastIndex: -1, scanner: s}
 	if !l.advance() {
 		return nil, l.err
 	}
 	return l, nil
 }
 
-func NewStringLexer(s string) (*Lexer, error) {
-	return NewLexer(&stringScanner{source: s})
+func NewStringLexer(s string) (*lexer, error) {
+	return NewLexer(scanner.NewStringScanner(s))
 }
 
-func NewReaderLexer(r io.Reader) (*Lexer, error) {
-	return NewLexer(&bufferedScanner{source: bufio.NewReader(r)})
+func NewReaderLexer(r io.Reader) (*lexer, error) {
+	return NewLexer(scanner.NewBufferedScanner(bufio.NewReader(r)))
 }
 
-func (l *Lexer) isDigit() bool {
+func (l *lexer) isDigit() bool {
 	return l.scanner.Rune() >= '0' && l.scanner.Rune() <= '9'
 }
 
-func (l *Lexer) isUpperLetter() bool {
+func (l *lexer) isUpperLetter() bool {
 	return l.scanner.Rune() >= 'A' && l.scanner.Rune() <= 'Z'
 }
 
-func (l *Lexer) isLowerLetter() bool {
+func (l *lexer) isLowerLetter() bool {
 	return l.scanner.Rune() >= 'a' && l.scanner.Rune() <= 'z'
 }
 
 // The advance method scans the next rune.
 // Returns true if successful or eof
 // Sets l.err and returns false if an error is encountered.
-func (l *Lexer) advance() bool {
+func (l *lexer) advance() bool {
 	l.err = l.scanner.Scan()
 	if l.err == io.EOF {
 		l.err = nil
@@ -74,8 +80,8 @@ func (l *Lexer) advance() bool {
 
 // The readName method lexs a name into the token t.
 // It is the caller's responsibility to set t.Start and assert that l.last is a valid first character.
-func (l *Lexer) readName(t *Token) error {
-	t.Kind = Name
+func (l *lexer) readName(t *token.Token) error {
+	t.Kind = token.Name
 	l.scanner.StartTail()
 
 	for l.advance() {
@@ -92,7 +98,7 @@ func (l *Lexer) readName(t *Token) error {
 
 // The Lex method lexs the next token into t, or returns an error.
 // Implements the Lexer interface.
-func (l *Lexer) Lex(t *Token) error {
+func (l *lexer) Lex(t *token.Token) error {
 	// Skip past whitespace, comments, etc.
 	if !l.advanceToNextToken() {
 		return l.err
@@ -101,14 +107,14 @@ func (l *Lexer) Lex(t *Token) error {
 	t.Start = l.lastIndex
 
 	if l.eof {
-		t.Kind = EOF
+		t.Kind = token.EOF
 		t.End = t.Start
 		return nil
 	}
 
 	r := l.scanner.Rune()
 
-	if k, exists := runePunctuators[r]; exists {
+	if k, exists := token.RunePunctuators[r]; exists {
 		t.Kind = k
 		t.End = t.Start + 1
 		t.Value = string(r)
@@ -123,7 +129,7 @@ func (l *Lexer) Lex(t *Token) error {
 		return l.readName(t)
 	case r == '-', l.isDigit():
 		return l.readNumber(t)
-	case r < SPACE && r != TAB && r != LF && r != CR:
+	case r < token.SPACE && r != token.TAB && r != token.LF && r != token.CR:
 		return &SyntaxError{t.Start, fmt.Errorf("invalid character: %U", r)}
 	}
 
@@ -139,7 +145,7 @@ func (l *Lexer) Lex(t *Token) error {
 
 // The advanceToNextToken method advances l to the first character of the next token, skipping past whitespace and comments.
 // Returns true if successful, and false if an error was encountered.
-func (l *Lexer) advanceToNextToken() bool {
+func (l *lexer) advanceToNextToken() bool {
 loop:
 	for {
 		if l.eof {
@@ -147,7 +153,7 @@ loop:
 		}
 		switch l.scanner.Rune() {
 		// Whitespace. Advance.
-		case BOM, TAB, SPACE, LF, CR, COMMA:
+		case token.BOM, token.TAB, token.SPACE, token.LF, token.CR, token.COMMA:
 			if !l.advance() {
 				return false
 			}
@@ -159,7 +165,8 @@ loop:
 				if l.eof {
 					return true
 				}
-				if l.scanner.Rune() == TAB || (l.scanner.Rune() > US && l.scanner.Rune() != LF && l.scanner.Rune() != CR) {
+				r := l.scanner.Rune()
+				if r == token.TAB || (r > token.US && r != token.LF && r != token.CR) {
 					// Legal comment character.
 					continue
 				} else {
@@ -182,10 +189,10 @@ loop:
 //
 // Int: -?(0|[1-9][0-9]*)
 // Float: -?(0|[1-9][0-9]*)(\.[0-9]+)?((E|e)(+|-)?[0-9]+)?
-func (l *Lexer) readNumber(t *Token) error {
+func (l *lexer) readNumber(t *token.Token) error {
 	l.scanner.StartTail()
 
-	t.Kind = Int
+	t.Kind = token.Int
 
 	if l.scanner.Rune() == '-' {
 		if !l.advance() {
@@ -218,7 +225,7 @@ func (l *Lexer) readNumber(t *Token) error {
 
 	// Decimal
 	if l.scanner.Rune() == '.' {
-		t.Kind = Float
+		t.Kind = token.Float
 		if !l.advanceDigits() {
 			return l.err
 		}
@@ -229,7 +236,7 @@ func (l *Lexer) readNumber(t *Token) error {
 
 	// Exponent
 	if l.scanner.Rune() == 'E' || l.scanner.Rune() == 'e' {
-		t.Kind = Float
+		t.Kind = token.Float
 
 		if !l.advance() {
 			return l.err
@@ -256,7 +263,7 @@ func (l *Lexer) readNumber(t *Token) error {
 // The advanceDigits method advances past a stretch of consecutive digits.
 // Returns true if successful, false otherwise.
 // It is the caller's responsibility to assert isDigit is true before calling.
-func (l *Lexer) advanceDigits() bool {
+func (l *lexer) advanceDigits() bool {
 	for l.advance() {
 		if l.eof || !l.isDigit() {
 			// Done.
@@ -269,15 +276,15 @@ func (l *Lexer) advanceDigits() bool {
 // The readString methods lexs a string surrounding by double-quotes (") into the token t.
 // Any escaped or unicode characters will be replaced in t.Value.
 // It is the caller's responsibility to set t.Start and to assert that l.last == '"'.
-func (l *Lexer) readString(t *Token) error {
-	t.Kind = String
+func (l *lexer) readString(t *token.Token) error {
+	t.Kind = token.String
 
 	var value bytes.Buffer
 
 	for l.advance() {
 		r := l.scanner.Rune()
 		switch {
-		case l.eof, r == LF, r == CR:
+		case l.eof, r == token.LF, r == token.CR:
 			return &SyntaxError{l.lastIndex, fmt.Errorf("unterminated string %q, encountered %U", value.String(), r)}
 		case r == '"':
 			t.End = l.lastIndex
@@ -286,7 +293,7 @@ func (l *Lexer) readString(t *Token) error {
 				return l.err
 			}
 			return nil
-		case r < SPACE && r != TAB:
+		case r < token.SPACE && r != token.TAB:
 			return &SyntaxError{l.lastIndex, fmt.Errorf("Invalid character within String: %U", r)}
 		case r != '\\':
 			value.WriteRune(r)
@@ -341,7 +348,7 @@ func (l *Lexer) readString(t *Token) error {
 
 // The readSpread method lexs a spread ("...") into the token t.
 // It is the caller's responsibility to set t.Start and to assert that l.last == '.'.
-func (l *Lexer) readSpread(t *Token) (err error) {
+func (l *lexer) readSpread(t *token.Token) (err error) {
 	expectDot := func() error {
 		if !l.advance() {
 			return l.err
@@ -363,7 +370,7 @@ func (l *Lexer) readSpread(t *Token) (err error) {
 		return
 	}
 
-	t.Kind = Spread
+	t.Kind = token.Spread
 	t.End = t.Start + 3
 	t.Value = "..."
 

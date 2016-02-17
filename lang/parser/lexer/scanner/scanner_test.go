@@ -1,10 +1,12 @@
-package lexer
+package scanner
 
 import (
 	"bufio"
-	"bytes"
+	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -100,13 +102,13 @@ var (
 	scanBenchString100000 = scanBenchString(100000)
 )
 
-//TODO randomize this?
-func scanBenchString(n int) string {
-	b := &bytes.Buffer{}
-	for i := 0; i < n; i++ {
-		b.WriteRune('A')
+func scanBenchString(size int64) string {
+	filename := "test_data/testScan" + strconv.FormatInt(size, 10)
+	b, err := ioutil.ReadFile(filename)
+	if err != nil {
+		panic(fmt.Sprintf("failed to open test file: %q: %s", filename, err))
 	}
-	return b.String()
+	return string(b)
 }
 
 func scan(b *testing.B, initScanner func() Scanner) {

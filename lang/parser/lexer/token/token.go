@@ -1,4 +1,5 @@
-package lexer
+// Package token provides data types for parsing GraphQL tokens.
+package token
 
 // A Token has a kind, a start and end position from the source, and a (possibly translated) value.
 type Token struct {
@@ -44,7 +45,6 @@ const (
 	Pipe
 	BraceR
 	Name
-	Variable //TODO why is this unused?
 	Int
 	Float
 	String
@@ -67,7 +67,6 @@ var kindStrings = map[Kind]string{
 	Pipe:     "|",
 	BraceR:   "}",
 	Name:     "Name",
-	Variable: "Variable",
 	Int:      "Int",
 	Float:    "Float",
 	String:   "String",
@@ -78,7 +77,7 @@ func (kind Kind) String() string {
 }
 
 // A mapping from single rune punctuators to their kind.
-var runePunctuators = map[rune]Kind{
+var RunePunctuators = map[rune]Kind{
 	'!': Bang,
 	'$': Dollar,
 	'(': ParenL,

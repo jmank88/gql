@@ -1,0 +1,1 @@
+{query query($var:type=10)@directive(arg:"stringVal"){alias name,...fragName,...namedType{a}},fragment fragName on type{field},type objTypeDef implements interface{field{}:type},interface interface{field{}:[type]},union union=scalar|enum,scalar scalar,enum enum{enumA,enumB},input input{val:scalar!},extend type ext}

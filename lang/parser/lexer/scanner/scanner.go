@@ -1,4 +1,5 @@
-package lexer
+// Package scanner implements a scanner for reading runes
+package scanner
 
 import (
 	"bufio"
@@ -22,6 +23,14 @@ type Scanner interface {
 
 	// The EndTail method stops tailing and returns the current tail of the source.
 	EndTail() string
+}
+
+func NewStringScanner(source string) Scanner {
+	return &stringScanner{source: source}
+}
+
+func NewBufferedScanner(source *bufio.Reader) Scanner {
+	return &bufferedScanner{source: source}
 }
 
 // A stringScanner implements Scanner backed by a string source.

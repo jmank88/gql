@@ -1,4 +1,4 @@
-package lexer
+package errors
 
 import (
 	"fmt"
