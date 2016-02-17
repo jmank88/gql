@@ -7,10 +7,10 @@ Born out of a port of the reference javascript implementation: https://github.co
 
 This implementation is intended to maximize usability and efficiency.
 
-- [ ] package lang
+- package lang
   - [x] package ast
 
-  - [ ] package parser
+  - [x] package parser
     - [x] tests
     - [ ] benchmarks
 
@@ -24,7 +24,7 @@ This implementation is intended to maximize usability and efficiency.
 
     - [x] package token
 
-  - [ ] package printer
+  - [x] package printer
     - [ ] tests
 
 - [ ] package validation
@@ -40,5 +40,5 @@ This implementation is intended to maximize usability and efficiency.
   - [ ] grpc
   - [ ] Cap'n proto
 
-- [ ] package cmd
+- package cmd
   - [ ] gql fmt
